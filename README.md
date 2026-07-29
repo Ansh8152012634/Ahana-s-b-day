@@ -1,42 +1,81 @@
-# Ahana's Birthday Experience 🎂
+# Ahana's Birthday 🎂
 
-An interactive birthday web experience — 8 animated chapters, Web Audio sound effects, and no external media files needed.
+An interactive, cinematic birthday experience — 9 chapters of memories, puzzles, music, and love.  
+Built with React 19 + Vite 6 + Framer Motion + Tailwind CSS v4.
+
+---
 
 ## Run locally
 
 ```bash
-pnpm install
-PORT=3000 BASE_PATH=/ pnpm dev
-# open http://localhost:3000
+npm install
+npm run dev
 ```
 
-## Deploy to GitHub Pages (automatic)
+Open [http://localhost:5173](http://localhost:5173)
 
-1. Push this folder to a **new GitHub repository**.
-2. Go to **Settings → Pages → Source → GitHub Actions**.
-3. Push to `main` — the workflow (`.github/workflows/deploy.yml`) builds and publishes automatically.
+---
 
-> If your Pages URL has a sub-path like `https://you.github.io/repo-name/`, change  
-> `BASE_PATH: /` → `BASE_PATH: /repo-name/` in the workflow file.
+## Deploy to GitHub Pages
 
-## Swap a sound
+### One-time setup
 
-All sounds live in `src/hooks/use-audio.ts` in the `SOUND_CONFIG` object.  
-Replace any function body — no imports, no files required.
+1. Push this repo to GitHub
+2. Go to **Settings → Pages**
+3. Under **Source**, choose **GitHub Actions**
+4. Push any commit to `main` — the included workflow builds and deploys automatically
 
-```ts
-export const SOUND_CONFIG = {
-  backgroundMelody: (ctx, dest, vol) => { ... },
-  match:            (ctx, dest, vol) => { ... },
-  mismatch:         (ctx, dest, vol) => { ... },
-  victory:          (ctx, dest, vol) => { ... },
-  prankReveal:      (ctx, dest, vol) => { ... },
-  typingSfx:        (ctx, dest, vol) => { ... },
-  clickSfx:         (ctx, dest, vol) => { ... },
-  birthdaySfx:      (ctx, dest, vol) => { ... },
-};
+Your site will be live at `https://<your-username>.github.io/<repo-name>/`
+
+### Manual build for any static host
+
+```bash
+# Root deployment (custom domain / Netlify / Vercel / Cloudflare Pages)
+npm run build
+
+# Sub-path deployment (GitHub Pages without custom domain)
+VITE_BASE_PATH=/your-repo-name/ npm run build
 ```
 
-## Tech
+Upload the `dist/` folder to any static host.
 
-React 18 · Vite · Framer Motion · Tailwind CSS · Web Audio API · Lucide React
+---
+
+## Personalise
+
+### Add your letter (Chapter 9 Scrapbook)
+
+Open `src/components/chapters/Chapter9Epilogue.tsx` and find `LETTER_PARAGRAPHS` near the top.  
+Replace the placeholder strings with your personal letter. Each string is a paragraph; an empty string `''` creates a blank line.
+
+### Add photos (Chapter 9 Polaroids)
+
+1. Put your images in `public/photos/` — name them `photo1.jpg`, `photo2.jpg`, `photo3.jpg`, `photo4.jpg`
+2. In `Chapter9Epilogue.tsx` find the `ScrapbookPage` component and swap the placeholder `<div>` inside each Polaroid frame with:
+
+```jsx
+<img
+  src={`${import.meta.env.BASE_URL}photos/photo${idx + 1}.jpg`}
+  alt={`Memory ${idx + 1}`}
+  className="w-full h-full object-cover rounded-sm"
+/>
+```
+
+### Customise the quiz / memories / apology text
+
+All content strings live at the top of each chapter file in `src/components/chapters/`.  
+No component logic needs changing — just edit the constant arrays.
+
+---
+
+## Tech stack
+
+| Tool | Version |
+|---|---|
+| React | 19 |
+| Vite | 6 |
+| TypeScript | 5 |
+| Framer Motion | 12 |
+| Tailwind CSS | 4 |
+| shadcn/ui (Radix) | various |
+| Web Audio API | native |

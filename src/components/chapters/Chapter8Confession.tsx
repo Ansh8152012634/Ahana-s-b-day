@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Star, Sparkles } from 'lucide-react';
+import { Heart, Star } from 'lucide-react';
 
 interface Props {
   playTypingSfx?: () => void;
   playBirthdaySfx?: () => void;
+  onComplete?: () => void;
 }
 
 const CONFESSION_LINES = [
@@ -54,8 +55,8 @@ function Typewriter({ text, speed = 35, onTick }: { text: string; speed?: number
   return <>{displayed}</>;
 }
 
-export function Chapter8Confession({ playTypingSfx, playBirthdaySfx }: Props) {
-  const [phase, setPhase] = useState<'card-enter' | 'reading' | 'finale'>('card-enter');
+export function Chapter8Confession({ playTypingSfx, playBirthdaySfx, onComplete }: Props) {
+  const [phase, setPhase] = useState<'card-enter' | 'reading' | 'finale' | 'fading'>('card-enter');
   const [currentLine, setCurrentLine] = useState(-1);
   const [showFinale, setShowFinale] = useState(false);
   const birthdaySfxFiredRef = useRef(false);
@@ -98,17 +99,23 @@ export function Chapter8Confession({ playTypingSfx, playBirthdaySfx }: Props) {
     setTimeout(() => playBirthdaySfx?.(), 500);
   }, [showFinale, playBirthdaySfx]);
 
-  // Fade ending after finale
+  // After ~7 seconds of finale, fade out and transition to epilogue
   useEffect(() => {
     if (!showFinale) return;
-    const timer = setTimeout(() => {
-      document.body.classList.add('fade-ending');
-    }, 12000);
-    return () => clearTimeout(timer);
-  }, [showFinale]);
+    const fadeTimer = setTimeout(() => setPhase('fading'), 7000);
+    const nextTimer = setTimeout(() => onComplete?.(), 10500);
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(nextTimer);
+    };
+  }, [showFinale, onComplete]);
 
   return (
-    <div className="relative min-h-[100dvh] w-full flex flex-col items-center justify-center bg-background overflow-hidden px-6 text-center">
+    <motion.div
+      className="relative min-h-[100dvh] w-full flex flex-col items-center justify-center bg-background overflow-hidden px-6 text-center"
+      animate={phase === 'fading' ? { opacity: 0 } : { opacity: 1 }}
+      transition={{ duration: 3.5, ease: 'easeInOut' }}
+    >
       {/* Starry night gradient background */}
       <div
         className="absolute inset-0 z-0"
@@ -116,253 +123,180 @@ export function Chapter8Confession({ playTypingSfx, playBirthdaySfx }: Props) {
           background:
             'radial-gradient(ellipse at 50% 100%, rgba(80,50,140,0.4) 0%, transparent 60%), ' +
             'radial-gradient(ellipse at 20% 20%, rgba(212,175,55,0.15) 0%, transparent 40%), ' +
-            'radial-gradient(ellipse at 80% 30%, rgba(100,60,180,0.2) 0%, transparent 40%), ' +
-            'linear-gradient(to bottom, hsl(240,15%,5%) 0%, hsl(240,10%,3%) 100%)',
+            'radial-gradient(ellipse at 80% 80%, rgba(180,100,80,0.1) 0%, transparent 40%), ' +
+            'linear-gradient(180deg, hsl(240,20%,5%) 0%, hsl(240,10%,3%) 100%)',
         }}
       />
 
-      {/* Animated scale overlay on finale */}
-      <motion.div
-        className="absolute inset-0 z-0"
-        animate={{
-          opacity: showFinale ? 0.55 : 0.18,
-          scale: showFinale ? 1.08 : 1.02,
-        }}
-        transition={{ duration: showFinale ? 8 : 18, ease: 'easeInOut' }}
-        style={{
-          background:
-            'radial-gradient(ellipse at 50% 60%, rgba(212,175,55,0.25) 0%, transparent 65%)',
-        }}
-      />
-
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-t from-background via-background/75 to-background/40" />
-
-      {/* Warm radial glow */}
-      <motion.div
-        className="absolute inset-0 z-0 pointer-events-none"
-        animate={{ opacity: showFinale ? 0.35 : 0.12 }}
-        transition={{ duration: 3 }}
-        style={{
-          background:
-            'radial-gradient(ellipse at 50% 60%, rgba(212,175,55,0.4) 0%, transparent 65%)',
-        }}
-      />
-
-      {/* Rising particles */}
+      {/* Gold particle rain */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
         {PARTICLES.map(p => (
-          <div
+          <motion.div
             key={p.id}
-            className="particle absolute rounded-full"
-            style={{
-              left: `${p.left}%`,
-              width: `${p.width}px`,
-              height: `${p.height}px`,
-              animationDuration: `${p.dur}s`,
-              animationDelay: `${p.delay}s`,
-              background: 'radial-gradient(circle, rgba(212,175,55,1) 0%, rgba(212,175,55,0) 70%)',
-            }}
+            className="absolute rounded-full bg-yellow-300/70"
+            style={{ left: `${p.left}%`, bottom: '-4px', width: p.width, height: p.height }}
+            animate={{ y: [0, -(window.innerHeight + 40)], opacity: [0, 0.8, 0.8, 0] }}
+            transition={{ duration: p.dur, repeat: Infinity, delay: p.delay, ease: 'linear' }}
           />
         ))}
       </div>
 
-      {/* Card-opening intro */}
-      <AnimatePresence>
+      {/* Vignette */}
+      <div
+        className="absolute inset-0 pointer-events-none z-1"
+        style={{ background: 'radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.75) 100%)' }}
+      />
+
+      {/* Reading Phase */}
+      <AnimatePresence mode="wait">
         {phase === 'card-enter' && (
           <motion.div
             key="card-enter"
-            initial={{ opacity: 0, scale: 0.85, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: [0, -4, 0] }}
-            exit={{ opacity: 0, scale: 1.03, y: -15, filter: 'blur(14px)' }}
-            transition={{ duration: 1.5, ease: 'easeInOut', y: { duration: 4, repeat: Infinity, ease: 'easeInOut' } }}
-            className="relative z-10 w-full max-w-sm"
+            className="relative z-10 max-w-lg"
+            initial={{ opacity: 0, scale: 0.8, y: 40 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 1.05, filter: 'blur(8px)' }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="border border-primary/25 bg-card/40 backdrop-blur-md rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4">
-              <motion.div
-                animate={{
-                  rotate: [-2, 2, -2, 0],
-                  scale: [1, 1.08, 1],
-                  filter: [
-                    'drop-shadow(0 0 4px rgba(212,175,55,0.2))',
-                    'drop-shadow(0 0 18px rgba(212,175,55,0.8))',
-                    'drop-shadow(0 0 4px rgba(212,175,55,0.2))',
-                  ],
-                }}
-                transition={{ duration: 2, repeat: Infinity, times: [0, 0.5, 1] }}
-              >
-                <Heart className="w-10 h-10 text-primary" fill="currentColor" />
-              </motion.div>
-
-              <p className="handwriting text-3xl text-primary/80">
-                Something to tell you...
-              </p>
-
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.5 }}
-                transition={{ delay: 0.8 }}
-                className="serif text-sm text-foreground/50 uppercase tracking-widest"
-              >
-                Opening
-                <motion.span
-                  animate={{ opacity: [1, 0, 1] }}
-                  transition={{ duration: 0.8, repeat: Infinity }}
-                >
-                  ▋
-                </motion.span>
-              </motion.p>
+            <div
+              className="rounded-2xl border border-primary/20 px-10 py-12 text-center"
+              style={{
+                background: 'linear-gradient(135deg, rgba(212,175,55,0.08) 0%, rgba(80,50,140,0.12) 100%)',
+                boxShadow: '0 0 80px rgba(212,175,55,0.08), inset 0 1px 0 rgba(212,175,55,0.15)',
+              }}
+            >
+              <p className="serif italic text-primary/60 text-sm tracking-widest mb-4">— Chapter VIII —</p>
+              <h2 className="serif text-4xl text-foreground/90 mb-4">The Truth</h2>
+              <p className="text-foreground/40 text-sm">A confession, long overdue.</p>
             </div>
           </motion.div>
         )}
-      </AnimatePresence>
 
-      {/* Confession lines */}
-      <div
-        className="relative z-10 max-w-3xl w-full flex flex-col items-center justify-center"
-        style={{ minHeight: '55vh' }}
-      >
-        <AnimatePresence mode="wait">
-          {phase === 'reading' && currentLine >= 0 && (
-            <motion.div
-              key={currentLine}
-              initial={{ opacity: 0, y: 28, filter: 'blur(8px)', scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)', scale: [0.98, 1] }}
-              exit={{ opacity: 0, y: -28, filter: 'blur(8px)', scale: 1.02 }}
-              transition={{ duration: 2, ease: 'easeOut' }}
-              className="absolute w-full px-4"
-            >
-              <p
-                className="serif text-primary leading-relaxed font-medium"
-                style={{
-                  fontSize:
-                    currentLine === 0
-                      ? 'clamp(1.6rem, 5vw, 3.5rem)'
-                      : currentLine === 4
-                      ? 'clamp(1.4rem, 4vw, 2.5rem)'
-                      : 'clamp(1.25rem, 3.5vw, 2.2rem)',
-                  fontStyle: currentLine === 3 ? 'italic' : 'normal',
-                  textShadow: '0 0 30px rgba(212,175,55,0.2)',
-                }}
-              >
-                <Typewriter
-                  text={CONFESSION_LINES[currentLine]}
-                  speed={32}
-                  onTick={playTypingSfx}
-                />
-                <motion.span
-                  animate={{ opacity: [1, 0, 1] }}
-                  transition={{ duration: 0.8, repeat: Infinity }}
-                  className="inline-block ml-1"
+        {(phase === 'reading' || phase === 'finale' || phase === 'fading') && (
+          <motion.div
+            key="reading"
+            className="relative z-10 max-w-2xl w-full"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1 }}
+          >
+            {/* Glow orb */}
+            <div
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none"
+              style={{
+                width: showFinale ? '600px' : '400px',
+                height: showFinale ? '600px' : '400px',
+                background: 'radial-gradient(circle, rgba(212,175,55,0.07) 0%, transparent 70%)',
+                transition: 'all 3s ease',
+              }}
+            />
+
+            {/* Confession lines */}
+            <AnimatePresence>
+              {!showFinale && currentLine >= 0 && currentLine < CONFESSION_LINES.length && (
+                <motion.div
+                  key={`line-${currentLine}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20, filter: 'blur(8px)' }}
+                  transition={{ duration: 0.8, ease: 'easeOut' }}
+                  className="px-6"
                 >
-                  ▋
-                </motion.span>
-              </p>
-
-              <motion.div
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ delay: 0.6, duration: 1.4 }}
-                className="mt-6 mx-auto h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"
-                style={{ width: '60%' }}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Finale */}
-        <AnimatePresence>
-          {showFinale && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.75 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 2.5, ease: 'easeOut' }}
-              className="flex flex-col items-center relative"
-            >
-              {/* Sparkle decorations */}
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-                className="absolute -top-12 -left-8 text-primary/30"
-              >
-                <Sparkles className="w-8 h-8" />
-              </motion.div>
-              <motion.div
-                animate={{ rotate: -360 }}
-                transition={{ duration: 15, repeat: Infinity, ease: 'linear' }}
-                className="absolute -top-8 -right-6 text-primary/20"
-              >
-                <Sparkles className="w-5 h-5" />
-              </motion.div>
-
-              {/* Main text */}
-              <motion.h1
-                className="handwriting text-primary"
-                style={{
-                  fontSize: 'clamp(3.5rem, 10vw, 7rem)',
-                  lineHeight: 1.15,
-                  textShadow:
-                    '0 0 60px rgba(212,175,55,0.5), 0 0 120px rgba(212,175,55,0.2)',
-                  filter: 'drop-shadow(0 0 20px rgba(212,175,55,0.4))',
-                }}
-                animate={{
-                  scale: [1, 1.02, 1],
-                  textShadow: [
-                    '0 0 40px rgba(212,175,55,0.4)',
-                    '0 0 90px rgba(212,175,55,0.8)',
-                    '0 0 40px rgba(212,175,55,0.4)',
-                  ],
-                }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                Happy Birthday,
-                <br />
-                Ahana
-              </motion.h1>
-
-              {/* Floating hearts & stars */}
-              <div className="absolute inset-0 pointer-events-none overflow-visible">
-                {FLOAT_ICONS.map(icon => (
-                  <motion.div
-                    key={`icon-${icon.id}`}
-                    initial={{ opacity: 0, scale: 0, y: 0, x: 0 }}
-                    animate={{
-                      opacity: [0, 0.7, 0],
-                      scale: [0, 1.4, 0],
-                      y: icon.y,
-                      x: icon.x,
-                    }}
-                    transition={{
-                      duration: icon.dur,
-                      repeat: Infinity,
-                      repeatDelay: icon.repeatDelay,
-                      delay: icon.delay,
-                      ease: 'easeInOut',
-                    }}
-                    className="absolute top-1/2 left-1/2 text-primary/50"
-                    style={{
-                      marginLeft: -icon.size / 2,
-                      marginTop: -icon.size / 2,
-                    }}
+                  <p
+                    className={`serif leading-relaxed text-foreground/90 ${
+                      currentLine === 0 ? 'text-xl text-primary/80 italic' : 'text-2xl md:text-3xl'
+                    }`}
                   >
-                    {icon.isHeart ? (
-                      <Heart
-                        className="fill-current"
-                        style={{ width: icon.size * 3, height: icon.size * 3 }}
-                      />
-                    ) : (
-                      <Star
-                        className="fill-current"
-                        style={{ width: icon.size * 2.5, height: icon.size * 2.5 }}
-                      />
-                    )}
+                    <Typewriter
+                      text={CONFESSION_LINES[currentLine] ?? ''}
+                      speed={currentLine === 0 ? 60 : 45}
+                      onTick={playTypingSfx}
+                    />
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Finale */}
+            <AnimatePresence>
+              {showFinale && (
+                <motion.div
+                  key="finale"
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.05 }}
+                  transition={{ duration: 2, ease: [0.22, 1, 0.36, 1] }}
+                  className="flex flex-col items-center gap-6 relative"
+                >
+                  {/* Radial glow */}
+                  <motion.div
+                    className="absolute inset-0 pointer-events-none"
+                    animate={{ opacity: showFinale ? [0, 0.6, 0.4] : 0 }}
+                    transition={{ duration: 4, ease: 'easeOut' }}
+                    style={{
+                      background:
+                        'radial-gradient(circle at center, rgba(212,175,55,0.35) 0%, transparent 65%)',
+                    }}
+                  />
+
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: [0, 1.3, 1], opacity: [0, 1, 0.9] }}
+                    transition={{ duration: 1.5, ease: 'backOut' }}
+                    className="text-primary"
+                    style={{ filter: 'drop-shadow(0 0 30px rgba(212,175,55,0.8))' }}
+                  >
+                    <Heart className="w-16 h-16 fill-current" />
                   </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </div>
+
+                  <motion.h1
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6, duration: 1.5 }}
+                    className="serif text-5xl md:text-7xl font-semibold text-primary leading-tight"
+                    style={{ filter: 'drop-shadow(0 0 40px rgba(212,175,55,0.5))' }}
+                  >
+                    Happy Birthday,
+                    <br />
+                    Ahana
+                  </motion.h1>
+
+                  {/* Floating hearts & stars */}
+                  <div className="absolute inset-0 pointer-events-none overflow-visible">
+                    {FLOAT_ICONS.map(icon => (
+                      <motion.div
+                        key={`icon-${icon.id}`}
+                        initial={{ opacity: 0, scale: 0, y: 0, x: 0 }}
+                        animate={{
+                          opacity: [0, 0.7, 0],
+                          scale: [0, 1.4, 0],
+                          y: icon.y,
+                          x: icon.x,
+                        }}
+                        transition={{
+                          duration: icon.dur,
+                          repeat: Infinity,
+                          repeatDelay: icon.repeatDelay,
+                          delay: icon.delay,
+                          ease: 'easeInOut',
+                        }}
+                        className="absolute top-1/2 left-1/2 text-primary/50"
+                        style={{ marginLeft: -icon.size / 2, marginTop: -icon.size / 2 }}
+                      >
+                        {icon.isHeart ? (
+                          <Heart className="fill-current" style={{ width: icon.size * 3, height: icon.size * 3 }} />
+                        ) : (
+                          <Star className="fill-current" style={{ width: icon.size * 2.5, height: icon.size * 2.5 }} />
+                        )}
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 }

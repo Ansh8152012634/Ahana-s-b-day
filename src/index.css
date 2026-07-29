@@ -100,6 +100,13 @@
   --chart-5: 280 40% 40%;
 
   --radius: 0.75rem;
+
+  /* borders */
+  --primary-border: hsl(40 60% 50%);
+  --secondary-border: hsl(240 10% 16%);
+  --muted-border: hsl(240 10% 16%);
+  --accent-border: hsl(330 40% 30%);
+  --destructive-border: hsl(0 60% 40%);
 }
 
 @layer base {

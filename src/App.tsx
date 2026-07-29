@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import Downloads from '@/pages/downloads';
 
 import { Chapter1Welcome } from '@/components/chapters/Chapter1Welcome';
 import { Chapter2Puzzle } from '@/components/chapters/Chapter2Puzzle';
@@ -9,6 +10,7 @@ import { Chapter5Transition } from '@/components/chapters/Chapter5Transition';
 import { Chapter6MemoryReel } from '@/components/chapters/Chapter6MemoryReel';
 import { Chapter7Apology } from '@/components/chapters/Chapter7Apology';
 import { Chapter8Confession } from '@/components/chapters/Chapter8Confession';
+import { Chapter9Epilogue } from '@/components/chapters/Chapter9Epilogue';
 import { MusicPlayer } from '@/components/MusicPlayer';
 import { useAudio, type ChapterMood } from '@/hooks/use-audio';
 
@@ -21,14 +23,17 @@ const CHAPTER_MOODS: Record<number, ChapterMood> = {
   6: 'emotional',
   7: 'gentle',
   8: 'confession',
+  9: 'emotional',
 };
+
+const TOTAL_CHAPTERS = 9;
 
 function App() {
   const [chapter, setChapter] = useState(1);
   const audio = useAudio();
 
   const nextChapter = useCallback(() => {
-    setChapter(prev => Math.min(prev + 1, 8));
+    setChapter(prev => Math.min(prev + 1, TOTAL_CHAPTERS));
   }, []);
 
   // Unlock audio on first interaction anywhere
@@ -124,6 +129,14 @@ function App() {
             key="ch8"
             playTypingSfx={audio.playTypingSfx}
             playBirthdaySfx={audio.playBirthdaySfx}
+            onComplete={nextChapter}
+          />
+        );
+      case 9:
+        return (
+          <Chapter9Epilogue
+            key="ch9"
+            fadeOutAudio={audio.pause}
           />
         );
       default:
@@ -150,23 +163,25 @@ function App() {
         </motion.div>
       </AnimatePresence>
 
-      {/* Progress dots */}
-      <div className="fixed bottom-6 left-0 right-0 flex justify-center gap-3 z-50 pointer-events-none">
-        {[...Array(8)].map((_, i) => (
-          <motion.div
-            key={i}
-            animate={
-              i + 1 === chapter
-                ? { scale: 1.5, opacity: 1 }
-                : i + 1 < chapter
-                  ? { scale: 1, opacity: 0.4 }
-                  : { scale: 1, opacity: 0.1 }
-            }
-            transition={{ duration: 0.4, type: 'spring' }}
-            className="w-1.5 h-1.5 rounded-full bg-primary"
-          />
-        ))}
-      </div>
+      {/* Progress dots — show dots 1-9, hide on epilogue */}
+      {chapter < 9 && (
+        <div className="fixed bottom-6 left-0 right-0 flex justify-center gap-3 z-50 pointer-events-none">
+          {[...Array(8)].map((_, i) => (
+            <motion.div
+              key={i}
+              animate={
+                i + 1 === chapter
+                  ? { scale: 1.5, opacity: 1 }
+                  : i + 1 < chapter
+                    ? { scale: 1, opacity: 0.4 }
+                    : { scale: 1, opacity: 0.1 }
+              }
+              transition={{ duration: 0.4, type: 'spring' }}
+              className="w-1.5 h-1.5 rounded-full bg-primary"
+            />
+          ))}
+        </div>
+      )}
 
       {/* Floating music player */}
       <MusicPlayer
@@ -182,4 +197,10 @@ function App() {
   );
 }
 
-export default App;
+function AppRoot() {
+  const isDownloads = window.location.pathname.replace(import.meta.env.BASE_URL, '').replace(/^\//, '') === 'downloads';
+  if (isDownloads) return <Downloads />;
+  return <App />;
+}
+
+export default AppRoot;
