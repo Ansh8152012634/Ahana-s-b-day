@@ -331,9 +331,10 @@ function ScrapbookPage({ letterProgress, photoCount }: { letterProgress: number;
                   >
                     {/* Photo area placeholder */}
                     <img
-                     src={`/images/photo${idx + 1}.jpg`}
+                     src={`${import.meta.env.BASE_URL}photos/photo${idx + 1}.jpg`}
                      alt={`Memory ${idx + 1}`}
-                     className="w-full h-20 object-cover rounded-sm"
+                     className="w-full h-full object-cover 
+                    rounded-sm"
                     />
 
                     {/* Caption area */}
@@ -386,19 +387,19 @@ export function Chapter9Epilogue({ fadeOutAudio }: Props) {
         letterIntervalRef.current = setInterval(() => {
           elapsed += speed;
           setLetterProgress(Math.min(elapsed / 61000, 1));
-          if (elapsed >= 22000) clearInterval(letterIntervalRef.current!);
+          if (elapsed >= 61000) clearInterval(letterIntervalRef.current!);
         }, speed);
         // Photos placed one by one during letter
         [4000, 8000, 13000, 18000].forEach((delay, idx) => {
           setTimeout(() => setPhotoCount(idx + 1), delay);
         });
       }],
-      [41000, () => setScene('journal-close')],
-      [44500, () => {
+      [80000, () => setScene('journal-close')],
+      [84000, () => {
         fadeOutAudio?.();
         setScene('credits');
       }],
-      [52000, () => setScene('done')],
+      [91000, () => setScene('done')],
     ] as const;
 
     const timers = seq.map(([delay, fn]) => setTimeout(fn as () => void, delay as number));
