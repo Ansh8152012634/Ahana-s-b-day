@@ -92,6 +92,8 @@ type Scene =
   | 'journal-open'
   | 'letter'
   | 'journal-close'
+  | 'gift-loading'
+  | 'gift-bloom'
   | 'credits'
   | 'done';
 
@@ -366,6 +368,8 @@ export function Chapter9Epilogue({ fadeOutAudio }: Props) {
   const [journalOpen, setJournalOpen] = useState(false);
   const [letterProgress, setLetterProgress] = useState(0);
   const [photoCount, setPhotoCount] = useState(0);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [giftReady, setGiftReady] = useState(false);
 
   const letterIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -382,25 +386,27 @@ export function Chapter9Epilogue({ fadeOutAudio }: Props) {
         setScene('letter');
         // Type letter
         const totalChars = LETTER_PARAGRAPHS.join('\n').length;
-        const speed = totalChars > 0 ? 61000 / totalChars : 60; // ~61s total
+        const speed = totalChars > 0 ? 87000 / totalChars : 60; // ~87s total
         let elapsed = 0;
         letterIntervalRef.current = setInterval(() => {
           elapsed += speed;
-          setLetterProgress(Math.min(elapsed / 61000, 1));
-          if (elapsed >= 61000) clearInterval(letterIntervalRef.current!);
+          setLetterProgress(Math.min(elapsed / 87000, 1));
+          if (elapsed >= 87000) clearInterval(letterIntervalRef.current!);
         }, speed);
         // Photos placed one by one during letter
         [4000, 8000, 13000, 18000].forEach((delay, idx) => {
           setTimeout(() => setPhotoCount(idx + 1), delay);
         });
       }],
-      [80000, () => setScene('journal-close')],
-      [84000, () => {
-        fadeOutAudio?.();
-        setScene('credits');
+      [112000, () => setScene('journal-close')],
+      [116000, () => { setScene('gift-loading');}],
+      [130000, () => {setScene('gift-bloom');}],
+      [145000, () => {
+       fadeOutAudio?.();
+       setScene('credits');
       }],
-      [91000, () => setScene('done')],
-    ] as const;
+      [153000, () => setScene('done')], 
+   ] as const;
 
     const timers = seq.map(([delay, fn]) => setTimeout(fn as () => void, delay as number));
     return () => {
@@ -408,9 +414,33 @@ export function Chapter9Epilogue({ fadeOutAudio }: Props) {
       if (letterIntervalRef.current) clearInterval(letterIntervalRef.current);
     };
   }, []);
+  
+  useEffect(() => {
+  if (scene !== "gift-loading") return;
+
+  setLoadingProgress(0);
+  setGiftReady(false);
+
+  let progress = 0;
+
+  const interval = setInterval(() => {
+    progress += Math.random() * 7 + 3;
+
+    if (progress >= 100) {
+      progress = 100;
+      clearInterval(interval);
+      setGiftReady(true);
+    }
+
+    setLoadingProgress(progress);
+  }, 180);
+
+  return () => clearInterval(interval);
+}, [scene]);
 
   const showJar = ['jar-enter', 'stars-float', 'jar-glow'].includes(scene);
   const showCredits = scene === 'credits' || scene === 'done';
+  const showGiftLoading = scene === 'gift-loading' || scene === 'gift-bloom';
   const showJournal = ['journal-open', 'letter', 'journal-close'].includes(scene);
   const journalClosing = scene === 'journal-close';
 
@@ -519,6 +549,57 @@ export function Chapter9Epilogue({ fadeOutAudio }: Props) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AnimatePresence>
+  {showGiftLoading && (
+    <motion.div
+      className="absolute inset-0 z-30 flex items-center justify-center"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <motion.div
+        className="rounded-2xl p-8 w-[360px]"
+        style={{
+          background: "rgba(20,20,25,0.9)",
+          border: "1px solid rgba(212,175,55,0.25)",
+          backdropFilter: "blur(14px)",
+        }}
+      >
+        <h2
+          className="text-center text-xl mb-6"
+          style={{ color: "#e8d6a8" }}
+        >
+          Preparing one last gift...
+        </h2>
+
+        <div
+          style={{
+            height: 12,
+            background: "rgba(255,255,255,0.08)",
+            borderRadius: 999,
+            overflow: "hidden",
+          }}
+        >
+          <motion.div
+            style={{
+              height: "100%",
+              background: "linear-gradient(90deg,#d4af37,#f7d774)",
+            }}
+            animate={{ width: `${loadingProgress}%` }}
+          />
+        </div>
+
+        <p
+          className="text-center mt-3"
+          style={{ color: "#d6c38a" }}
+        >
+          {Math.floor(loadingProgress)}%
+        </p>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
 
       {/* ── Scene 7: Credits ── */}
       <AnimatePresence>
