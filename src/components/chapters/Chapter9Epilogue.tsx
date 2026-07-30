@@ -28,9 +28,50 @@ const BOKEH = Array.from({ length: 30 }, (_, i) => ({
 const LETTER_PARAGRAPHS = [
   'One last page...',
   '',
-  '[ Your personal letter will appear here. ]',
+  "Ig abhi 6:34 huye honge and koi piddi si bouni ye msg padh rahi hogi 😭. Btw aaj ek bohat pyaari si bachi ne janam li thi... Kiki! 👽 Many many happy returns of the day sundri.",
   '',
-  'I will paste the full letter later.',
+  "Next time toh boli thi DC pe ki 'Mare huye logon jaago, birthday hai mera!' Hehe! I guess tumhare dead log tumko wish kar diye honge. 😭 Aur han ji... cake bake toh khilao ji. Aise buddha hote raho, hamko usse kya matlab? Batao ji. 😂",
+ 
+  "Btw 12 baje Tulip account pe voicenote bhej diya tha. Aur Mimsii ko toh mera birthday 15 Aug pe hai boli thi na, aur aapka birthday 8 June boli thi. 😂 Meri betu ko belt se maarna band karo chudail ji. 🧙🏿‍♀️",
+
+  "Happy Birthday Mochi (Ahana) 👽",
+  "Happy Birthday Elley (Aditi) 🤡",
+  "Happy Birthday Shatakshi 👺",
+  "Happy Birthday Tulip (Avni) 🪻",
+  "Happy Birthday Divyanshi 🐰",
+  "Happy Birthday meri Gajar ka Halwa 🥕🪦 Miss you!",
+  "Happy Birthday meri bouni 0.0001 mm 😂",
+  "Happy Birthday 🐸 aur 🪳 (khud ho btw 😒)",
+  "Happy Birthday Drumsticks 🍗",
+  "Aur Happy Birthday mere sab favourite kuchu puchu log. Aaj bas enjoy karo! ❤️",
+
+  "",
+   
+  "Also... sorry for everything. Kya hi bolu. Please don't forgive me... aur hamesha nafrat karna mujhse. 😝",
+  
+   "Aaj mandir jaunga aur Modi ke isteefa ke liye pray karunga. 😂 Hui hui... last bol raha hoon... hate u! 😒",
+   
+   "Party kab doge ji, bouni malkin? 🤓",
+
+  "Aur haan... tumne pucha tha 'dil mein thodi jagah do'... arre pehle se hi ho, isliye kuch bola hi nahi. ❤️",
+   
+   "Happy Birthday Papa ji, Mummy ji, Mimsii aur Lucky ki maa! 🎂 Chai ka cake kaatna. 😂",
+
+  "Aur thanks... meri life mein aane ke liye.",
+
+  "Tum toh bolti thi mere se baat karke kaali ho gayi thi na? 🤡 Solly yaar... birthday hai na... Glow & Lovely de dunga. 😂",
+   
+   "Padhai achhe se karna. Aur Himakshi wali baat ke liye... sach mein sorry. Main uss way mein nahi bol raha tha, but mujhe pata hai bura laga hoga.",
+
+  "Maharani, gift mein kya chahiye? Pen? Oops... woh toh bench-mate ne de diya hoga. 🤔 Chalo ek aur chashma de deta hoon. 👓",
+
+  "Aur apne mummy papa ko thanks bolna... kyunki unhone tumhe paida kiya. Nahi toh mera kya hota? 🥹",
+
+  "Jaa... enjoy kar kaali billi. 🐈‍⬛ Aur haan... gift mein baal chahiye na? Tantric banne ka shauk hai kya? 😂",
+   
+   "",
+
+  "Happy Birthday once again, Ahana. ❤️"
 ];
 
 const PHOTO_ROTATIONS = [-3.2, 2.1, -1.8, 3.5];
@@ -289,23 +330,12 @@ function ScrapbookPage({ letterProgress, photoCount }: { letterProgress: number;
                     }}
                   >
                     {/* Photo area placeholder */}
-                    <div
-                      className="w-full flex items-center justify-center"
-                      style={{
-                        height: '80px',
-                        background: 'linear-gradient(135deg, #ddd6c8 0%, #cfc5b0 100%)',
-                        borderRadius: '2px',
-                      }}
-                    >
-                      <div className="text-center">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="mx-auto mb-1 opacity-50">
-                          <rect x="3" y="3" width="18" height="18" rx="2" stroke="rgba(100,80,60,0.6)" strokeWidth="1.5" />
-                          <circle cx="8.5" cy="8.5" r="1.5" fill="rgba(100,80,60,0.5)" />
-                          <path d="M3 15 L8 10 L13 15 L17 11 L21 15" stroke="rgba(100,80,60,0.5)" strokeWidth="1.5" strokeLinejoin="round" />
-                        </svg>
-                        <p className="handwriting text-xs opacity-40" style={{ color: 'rgba(80,60,40,0.7)', fontSize: '0.6rem' }}>photo {idx + 1}</p>
-                      </div>
-                    </div>
+                    <img
+                     src={`/images/ahana${idx + 1}.jpg`}
+                     alt={`Memory ${idx + 1}`}
+                     className="w-full h-20 object-cover rounded-sm"
+                    />
+
                     {/* Caption area */}
                     <p
                       className="handwriting text-center mt-1 opacity-40"
@@ -528,7 +558,7 @@ export function Chapter9Epilogue({ fadeOutAudio }: Props) {
               className="serif text-2xl text-primary/80 tracking-wide"
               style={{ filter: 'drop-shadow(0 0 12px rgba(212,175,55,0.4))' }}
             >
-              Made with ❤️ by Aether
+              Made with ❤️ by Anshu
             </motion.p>
           </motion.div>
         )}
