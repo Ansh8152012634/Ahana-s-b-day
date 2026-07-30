@@ -331,7 +331,7 @@ function ScrapbookPage({ letterProgress, photoCount }: { letterProgress: number;
                   >
                     {/* Photo area placeholder */}
                     <img
-                     src={`/images/ahana${idx + 1}.jpg`}
+                     src={`/images/photo${idx + 1}.jpg`}
                      alt={`Memory ${idx + 1}`}
                      className="w-full h-20 object-cover rounded-sm"
                     />
@@ -381,11 +381,11 @@ export function Chapter9Epilogue({ fadeOutAudio }: Props) {
         setScene('letter');
         // Type letter
         const totalChars = LETTER_PARAGRAPHS.join('\n').length;
-        const speed = totalChars > 0 ? 22000 / totalChars : 60; // ~22s total
+        const speed = totalChars > 0 ? 61000 / totalChars : 60; // ~61s total
         let elapsed = 0;
         letterIntervalRef.current = setInterval(() => {
           elapsed += speed;
-          setLetterProgress(Math.min(elapsed / 22000, 1));
+          setLetterProgress(Math.min(elapsed / 61000, 1));
           if (elapsed >= 22000) clearInterval(letterIntervalRef.current!);
         }, speed);
         // Photos placed one by one during letter
