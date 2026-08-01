@@ -53,7 +53,7 @@ const LETTER_PARAGRAPHS = [
   "Happy Birthday meri Gajar ka Halwa 🥕🪦 Miss you!",
   "Happy Birthday meri bouni 0.0001 mm 😂",
   "Happy Birthday 🐸 aur 🪳 (khud ho btw 😒)",
-  "Happy Birthday Drumsticks 🍗",
+  "Happy Birthday Drumsticks",
   "Aur Happy Birthday mere sab favourite kuchu puchu log. Aaj bas enjoy karo! ❤️",
 
   "",
