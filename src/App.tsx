@@ -137,6 +137,8 @@ function App() {
           <Chapter9Epilogue
             key="ch9"
             fadeOutAudio={audio.pause}
+            playGiftReadySfx={audio.playGiftReadySfx}
+            playTulipBloomSfx={audio.playTulipBloomSfx}
           />
         );
       default:

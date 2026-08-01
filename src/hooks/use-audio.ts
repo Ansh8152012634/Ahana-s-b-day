@@ -143,6 +143,11 @@ function scheduleBass(
 // ─────────────────────────────────────────────────────────────────
 // SOUND CONFIG — swap individual effects here
 // Each entry is a function: (ctx, dest, vol) => void
+//
+// To replace any sound with a file, use:
+//   const buf = await ctx.decodeAudioData(await fetch('/sounds/my-sfx.mp3').then(r => r.arrayBuffer()));
+//   const src = ctx.createBufferSource(); src.buffer = buf;
+//   src.connect(dest); src.start();
 // ─────────────────────────────────────────────────────────────────
 export const SOUND_CONFIG = {
   /** Played when two memory puzzle cards match */
@@ -241,6 +246,45 @@ export const SOUND_CONFIG = {
     [N.C3, N.F3, N.C3, N.G3].forEach((f, i) => {
       scheduleBass(ctx, dest, f, ctx.currentTime + i * 1.5, 1.2, 0.2);
     });
+  },
+
+  // ─── NEW ENDING SFX ───────────────────────────────────────────
+
+  /**
+   * Gentle ascending chime — plays when "Open Final Gift" button appears.
+   * Replace with a chime/bell audio file for a richer sound.
+   */
+  giftReadySfx: (ctx: AudioContext, dest: AudioNode, _vol: number) => {
+    const notes = [N.G4, N.B4, N.D5, N.G5, N.B4 * 2];
+    notes.forEach((freq, i) => {
+      scheduleNote(ctx, dest, freq, ctx.currentTime + i * 0.18, 0.38, 'sine', 0.20 - i * 0.02);
+    });
+    // Lingering shimmer overtone
+    scheduleNote(ctx, dest, N.G5 * 2, ctx.currentTime + 0.9, 0.6, 'sine', 0.06);
+  },
+
+  /**
+   * Magical blooming arpeggio — plays when the tulip begins to open.
+   * Replace with a harp glissando or orchestral swell for a cinematic feel.
+   */
+  tulipBloomSfx: (ctx: AudioContext, dest: AudioNode, _vol: number) => {
+    const magic = [N.F4, N.A4, N.C5, N.E5, N.G5, N.A5, N.C5 * 2];
+    magic.forEach((freq, i) => {
+      scheduleNote(ctx, dest, freq, ctx.currentTime + i * 0.28, 0.55, 'sine', 0.18 - i * 0.01);
+      // Soft harmonic shimmer
+      if (i < 5) {
+        scheduleNote(
+          ctx, dest,
+          freq * 1.498, // perfect fifth above
+          ctx.currentTime + i * 0.28 + 0.14,
+          0.30,
+          'sine',
+          0.04,
+        );
+      }
+    });
+    // Sustained bass note
+    scheduleBass(ctx, dest, N.F3, ctx.currentTime, 3.0, 0.14);
   },
 };
 
@@ -382,13 +426,16 @@ export function useAudio() {
     [getCtx],
   );
 
-  const playMatchSfx = useCallback(() => playSfx('matchSfx'), [playSfx]);
-  const playMismatchSfx = useCallback(() => playSfx('mismatchSfx'), [playSfx]);
-  const playVictorySfx = useCallback(() => playSfx('victorySfx'), [playSfx]);
+  const playMatchSfx       = useCallback(() => playSfx('matchSfx'),       [playSfx]);
+  const playMismatchSfx    = useCallback(() => playSfx('mismatchSfx'),    [playSfx]);
+  const playVictorySfx     = useCallback(() => playSfx('victorySfx'),     [playSfx]);
   const playPrankRevealSfx = useCallback(() => playSfx('prankRevealSfx'), [playSfx]);
-  const playTypingSfx = useCallback(() => playSfx('typingSfx'), [playSfx]);
-  const playClickSfx = useCallback(() => playSfx('clickSfx'), [playSfx]);
-  const playBirthdaySfx = useCallback(() => playSfx('birthdaySfx'), [playSfx]);
+  const playTypingSfx      = useCallback(() => playSfx('typingSfx'),      [playSfx]);
+  const playClickSfx       = useCallback(() => playSfx('clickSfx'),       [playSfx]);
+  const playBirthdaySfx    = useCallback(() => playSfx('birthdaySfx'),    [playSfx]);
+  // NEW
+  const playGiftReadySfx   = useCallback(() => playSfx('giftReadySfx'),   [playSfx]);
+  const playTulipBloomSfx  = useCallback(() => playSfx('tulipBloomSfx'),  [playSfx]);
 
   const unlockAudio = useCallback(() => {
     const ctx = getCtx();
@@ -409,6 +456,8 @@ export function useAudio() {
     playTypingSfx,
     playClickSfx,
     playBirthdaySfx,
+    playGiftReadySfx,
+    playTulipBloomSfx,
     unlockAudio,
     isMuted,
     volume,
