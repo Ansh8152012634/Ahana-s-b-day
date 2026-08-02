@@ -371,7 +371,6 @@ const fade = setInterval(() => {
     }, 100);
 
     return () => clearInterval(fade);
-  }
 }, [scene]);
 
 
