@@ -293,7 +293,7 @@ export function Chapter9Epilogue({ fadeOutAudio, playGiftReadySfx, playTulipBloo
     pianoRef.current = new Audio(`${import.meta.env.BASE_URL}music/piano.mp3`);
     pianoRef.current.loop = true;
     pianoRef.current.volume = 0.3;
-    pianoRef.curent.play().catch(() => {});
+    pianoRef.current.play().catch(() => {});
     const seq: [number, () => void][] = [
       [200,    () => setScene('jar-enter')],
       [2200,   () => setScene('stars-float')],
