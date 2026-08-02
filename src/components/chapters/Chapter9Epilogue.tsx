@@ -285,10 +285,15 @@ export function Chapter9Epilogue({ fadeOutAudio, playGiftReadySfx, playTulipBloo
   const [tulipVisible, setTulipVisible] = useState(false);
 
   const letterIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pianoRef = useRef<HTMLAudioElement | null>(null);
   const tulipTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   // ── Main timeline ──────────────────────────────────────────────
   useEffect(() => {
+    pianoRef.current = new Audio(`${import.meta.env.BASE_URL}music/piano.mp3`);
+    pianoRef.current.loop = true;
+    pianoRef.current.volume = 0.3;
+    pianoRef.curent.play().catch(() => {});
     const seq: [number, () => void][] = [
       [200,    () => setScene('jar-enter')],
       [2200,   () => setScene('stars-float')],
