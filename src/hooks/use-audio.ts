@@ -257,7 +257,7 @@ export const SOUND_CONFIG = {
   giftReadySfx: (ctx: AudioContext, dest: AudioNode, _vol: number) => {
     const notes = [N.G4, N.B4, N.D5, N.G5, N.B4 * 2];
     notes.forEach((freq, i) => {
-      scheduleNote(ctx, dest, freq, ctx.currentTime + i * 0.18, 0.38, 'sine', 0.20 - i * 0.02);
+      scheduleNote(ctx, dest, freq, ctx.currentTime + i * 0.18, 0.38, 'sine', 0.26 - i * 0.02);
     });
     // Lingering shimmer overtone
     scheduleNote(ctx, dest, N.G5 * 2, ctx.currentTime + 0.9, 0.6, 'sine', 0.06);

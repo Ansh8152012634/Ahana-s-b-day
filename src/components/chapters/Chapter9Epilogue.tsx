@@ -292,9 +292,42 @@ export function Chapter9Epilogue({ fadeOutAudio, playGiftReadySfx, playTulipBloo
   useEffect(() => {
     pianoRef.current = new Audio(`${import.meta.env.BASE_URL}music/piano.mp3`);
     pianoRef.current.loop = true;
-    pianoRef.current.volume = 0.3;
-    pianoRef.current.play().catch(() => {});
-    const seq: [number, () => void][] = [
+    pianoRef.current.volume = 0;
+    pianoRef.current?.play().catch(() => {});
+
+let vol = 0;
+const fade = setInterval(() => {
+  vol += 0.02;
+  if (vol >= 0.22) {
+    vol = 0.22;
+    clearInterval(fade);
+  }
+  if (pianoRef.current) pianoRef.current.volume = vol;
+}, 120);
+
+     useEffect(() => {
+  if (scene === 'done' && pianoRef.current) {
+    let volume = pianoRef.current.volume;
+
+    const fade = setInterval(() => {
+      volume -= 0.01;
+
+      if (volume <= 0) {
+        volume = 0;
+        pianoRef.current?.pause();
+        clearInterval(fade);
+      }
+
+      if (pianoRef.current) {
+        pianoRef.current.volume = volume;
+      }
+    }, 100);
+
+    return () => clearInterval(fade);
+  }
+}, [scene]);
+
+        const seq: [number, () => void][] = [
       [200,    () => setScene('jar-enter')],
       [2200,   () => setScene('stars-float')],
       [8000,   () => { setStarsAbsorbed(true); setScene('jar-glow'); }],
@@ -304,25 +337,25 @@ export function Chapter9Epilogue({ fadeOutAudio, playGiftReadySfx, playTulipBloo
       [17500,  () => {
         setScene('letter');
         const totalChars = LETTER_PARAGRAPHS.join('\n').length;
-        const speed = totalChars > 0 ? 87000 / totalChars : 60;
+        const speed = totalChars > 0 ? 100000 / totalChars : 60;
         let elapsed = 0;
         letterIntervalRef.current = setInterval(() => {
           elapsed += speed;
-          setLetterProgress(Math.min(elapsed / 87000, 1));
-          if (elapsed >= 87000) clearInterval(letterIntervalRef.current!);
+          setLetterProgress(Math.min(elapsed / 100000, 1));
+          if (elapsed >= 100000) clearInterval(letterIntervalRef.current!);
         }, speed);
         [4000, 8000, 13000, 18000].forEach((delay, idx) => {
           setTimeout(() => setPhotoCount(idx + 1), delay);
         });
       }],
-      [112000, () => setScene('journal-close')],
+      [125000, () => setScene('journal-close')],
       // ── New ending sequence ──────────────────────────────────
-      [115500, () => {
+      [128500, () => {
         fadeOutAudio?.();
         setScene('fade-black');
       }],
-      [118000, () => setScene('gift-card')],
-      [133000, () => {
+      [131000, () => setScene('gift-card')],
+      [146000, () => {
         playGiftReadySfx?.();
         setScene('gift-ready');
       }],
@@ -343,10 +376,21 @@ export function Chapter9Epilogue({ fadeOutAudio, playGiftReadySfx, playTulipBloo
     setScene('tulip-entrance');
 
     const t1 = setTimeout(() => {
-      setScene('tulip-bloom');
-      setTulipVisible(true);
-      playTulipBloomSfx?.();
-    }, 2800);
+  if (pianoRef.current) {
+    pianoRef.current.volume = 0.14;
+  }
+
+  setScene('tulip-bloom');
+  setTulipVisible(true);
+  playTulipBloomSfx?.();
+
+  setTimeout(() => {
+    if (pianoRef.current) {
+      pianoRef.current.volume = 0.22;
+    }
+  }, 2000);
+
+}, 2800);
 
     const t2 = setTimeout(() => {
       setScene('final-message');
