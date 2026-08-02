@@ -43,7 +43,7 @@ const LETTER_PARAGRAPHS = [
   '',
   "Next time toh boli thi DC pe ki 'Mare huye logon jaago, birthday hai mera!' Hehe! I guess tumhare dead log tumko wish kar diye honge. 😭 Aur han ji... cake bake toh khilao ji. Aise buddha hote raho, hamko usse kya matlab? Batao ji. 😂",
  
-  "Btw 12 baje Tulip account pe voicenote bhej diya tha. Aur Mimsii ko toh mera birthday 15 Aug pe hai boli thi na, aur aapka birthday 8 June boli thi. 😂 Meri betu ko belt se maarna band karo chudail ji. 🧙🏿‍♀️",
+  "Btw 12 baje Tulip account pe voicenote bhej diya tha. Aur mere b'day 15 aug ko hai toh mimsii ko dungi boli ti aur nahi di😒 and tumhara 8 june ko hai toh tum he rakh lo mimsii ko. 😂 Meri betu ko belt se maarna band karo chudail ji. 🧙🏿‍♀️",
 
   "Happy Birthday Mochi (Ahana) 👽",
   "Happy Birthday Elley (Aditi) 🤡",
@@ -306,8 +306,10 @@ const fade = setInterval(() => {
 }, 120);
 
      useEffect(() => {
-  if (scene === 'done' && pianoRef.current) {
-    let volume = pianoRef.current.volume;
+  if (scene !== 'done'||!pianoRef.current) return;
+
+  let volume = pianoRef.current.volume; 
+    
 
     const fade = setInterval(() => {
       volume -= 0.01;
