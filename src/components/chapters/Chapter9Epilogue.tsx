@@ -305,30 +305,7 @@ const fade = setInterval(() => {
   if (pianoRef.current) pianoRef.current.volume = vol;
 }, 120);
 
-     useEffect(() => {
-  if (scene !== 'done'||!pianoRef.current) return;
-
-  let volume = pianoRef.current.volume; 
-    
-
-    const fade = setInterval(() => {
-      volume -= 0.01;
-
-      if (volume <= 0) {
-        volume = 0;
-        pianoRef.current?.pause();
-        clearInterval(fade);
-      }
-
-      if (pianoRef.current) {
-        pianoRef.current.volume = volume;
-      }
-    }, 100);
-
-    return () => clearInterval(fade);
-  }
-}, [scene]);
-
+     
         const seq: [number, () => void][] = [
       [200,    () => setScene('jar-enter')],
       [2200,   () => setScene('stars-float')],
@@ -372,6 +349,31 @@ const fade = setInterval(() => {
       if (letterIntervalRef.current) clearInterval(letterIntervalRef.current);
     };
   }, []);
+
+    useEffect(() => {
+  if (scene !== 'done'||!pianoRef.current) return;
+
+  let volume = pianoRef.current.volume; 
+    
+
+    const fade = setInterval(() => {
+      volume -= 0.01;
+
+      if (volume <= 0) {
+        volume = 0;
+        pianoRef.current?.pause();
+        clearInterval(fade);
+      }
+
+      if (pianoRef.current) {
+        pianoRef.current.volume = volume;
+      }
+    }, 100);
+
+    return () => clearInterval(fade);
+  }
+}, [scene]);
+
 
   // ── Button click → tulip sequence ─────────────────────────────
   const handleGiftButtonClick = useCallback(() => {
