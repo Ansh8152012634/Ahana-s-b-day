@@ -9,7 +9,7 @@ export const FINAL_NOTE = `Hey, ig tumhe ye viocenote mil gaya hoga(i hope).
 mein bss ye bolna chahata hu ki mujhe sachmei nahi pata konsi baat tumhe buri lagi hai and usko ig mein maafi ke kabil nahi but phir bhi im sorry aur tumne bola tha ki mera edit kaha hai prev year ka toh ye hai tumhara edit bs ye voice note sunlo then decied karna. And jo bhi decision hoga ill accept it i hope ki achha he hoga 
 
 ps;ANSHU`;
-export const VOICE_NOTE_SRC = 'voice.note';
+export const VOICE_NOTE_SRC = 'voice.note.mp3';
 
 interface UnlockExperienceProps {
   visible: boolean;
