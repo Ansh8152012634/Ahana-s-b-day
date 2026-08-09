@@ -45,19 +45,26 @@ function App() {
 
   // Change mood when chapter changes
   useEffect(() => {
+    // Chapter 9 owns its own piano timeline. Stop the chapter music engine
+    // before the epilogue creates its dedicated piano element.
+    if (chapter === 9) {
+      audio.pause();
+      return;
+    }
+
     const mood = CHAPTER_MOODS[chapter];
     if (mood && audio.isUnlocked) {
       audio.playMood(mood);
     }
-  }, [chapter, audio.isUnlocked]);
+  }, [chapter, audio.isUnlocked, audio.pause]);
 
   // Start music automatically after unlock
   useEffect(() => {
-    if (audio.isUnlocked) {
+    if (audio.isUnlocked && chapter < 9) {
       const mood = CHAPTER_MOODS[chapter];
       if (mood) audio.playMood(mood);
     }
-  }, [audio.isUnlocked]);
+  }, [audio.isUnlocked, chapter]);
 
   const renderChapter = () => {
     switch (chapter) {

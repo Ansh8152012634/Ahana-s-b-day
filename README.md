@@ -1,9 +1,8 @@
-# Ahana's Birthday 🎂
+# Ahana's Birthday
 
-An interactive, cinematic birthday experience — 9 chapters of memories, puzzles, music, and love.  
-Built with React 19 + Vite 6 + Framer Motion + Tailwind CSS v4.
+An interactive, cinematic birthday experience built with React, TypeScript, Vite, Framer Motion, and Tailwind CSS.
 
----
+This repository is standalone and GitHub-ready. It does not require Replit, a backend, a database, or any Replit-specific package.
 
 ## Run locally
 
@@ -12,61 +11,84 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173)
+Open the local URL shown by Vite.
 
----
+To make a production build:
+
+```bash
+npm run build
+npm run preview
+```
 
 ## Deploy to GitHub Pages
 
-### One-time setup
+1. Create a GitHub repository and upload the contents of this folder.
+2. In GitHub, open **Settings → Pages**.
+3. Set **Source** to **GitHub Actions**.
+4. Push to the `main` branch.
 
-1. Push this repo to GitHub
-2. Go to **Settings → Pages**
-3. Under **Source**, choose **GitHub Actions**
-4. Push any commit to `main` — the included workflow builds and deploys automatically
+The included workflow builds and publishes the site automatically at:
 
-Your site will be live at `https://<your-username>.github.io/<repo-name>/`
+```text
+https://YOUR-USERNAME.github.io/YOUR-REPOSITORY/
+```
 
-### Manual build for any static host
+For a manual sub-path build:
 
 ```bash
-# Root deployment (custom domain / Netlify / Vercel / Cloudflare Pages)
+VITE_BASE_PATH=/YOUR-REPOSITORY/ npm run build
+```
+
+For a root deployment, such as a custom domain:
+
+```bash
 npm run build
-
-# Sub-path deployment (GitHub Pages without custom domain)
-VITE_BASE_PATH=/your-repo-name/ npm run build
 ```
 
-Upload the `dist/` folder to any static host.
+## Personalise the new ending
 
----
+The three editable values are together in:
 
-## Personalise
-
-### Add your letter (Chapter 9 Scrapbook)
-
-Open `src/components/chapters/Chapter9Epilogue.tsx` and find `LETTER_PARAGRAPHS` near the top.  
-Replace the placeholder strings with your personal letter. Each string is a paragraph; an empty string `''` creates a blank line.
-
-### Add photos (Chapter 9 Polaroids)
-
-1. Put your images in `public/photos/` — name them `photo1.jpg`, `photo2.jpg`, `photo3.jpg`, `photo4.jpg`
-2. In `Chapter9Epilogue.tsx` find the `ScrapbookPage` component and swap the placeholder `<div>` inside each Polaroid frame with:
-
-```jsx
-<img
-  src={`${import.meta.env.BASE_URL}photos/photo${idx + 1}.jpg`}
-  alt={`Memory ${idx + 1}`}
-  className="w-full h-full object-cover rounded-sm"
-/>
+```text
+src/components/ending/UnlockExperience.tsx
 ```
 
-### Customise the quiz / memories / apology text
+Edit these constants:
 
-All content strings live at the top of each chapter file in `src/components/chapters/`.  
-No component logic needs changing — just edit the constant arrays.
+```ts
+export const UNLOCK_PHRASE = 'REPLACE_WITH_PHRASE';
+export const FINAL_NOTE = `REPLACE_WITH_NOTE`;
+export const VOICE_NOTE_SRC = 'REPLACE_WITH_AUDIO_FILE';
+```
 
----
+- `UNLOCK_PHRASE` is the phrase required to open the final note.
+- `FINAL_NOTE` is the personal note shown after the phrase is accepted.
+- `VOICE_NOTE_SRC` is the audio path. Put the file in `public/` and use a path such as `voice-note.mp3`.
+
+The phrase comparison trims accidental leading and trailing spaces. Incorrect entries stay locked and show a subtle feedback animation. Starting the voice note stops the piano immediately so the two audio sources cannot overlap.
+
+No personal password was invented or hardcoded. The current app value is the editable placeholder `REPLACE_WITH_PHRASE`; replace it with your chosen phrase before sharing the site.
+
+## Existing content
+
+### Add your letter
+
+Open `src/components/chapters/Chapter9Epilogue.tsx` and edit `LETTER_PARAGRAPHS`. Each item is a paragraph; an empty string creates a blank line.
+
+### Add photos
+
+Put images in `public/photos/` using the existing names:
+
+```text
+photo1.jpg
+photo2.jpg
+photo3.jpg
+photo4.jpg
+```
+
+### Customise the earlier chapters
+
+The editable text for the quiz, memories, apology, and other chapters is stored near the top of each file in `src/components/chapters/`.
 
 ## Tech stack
 
@@ -77,5 +99,4 @@ No component logic needs changing — just edit the constant arrays.
 | TypeScript | 5 |
 | Framer Motion | 12 |
 | Tailwind CSS | 4 |
-| shadcn/ui (Radix) | various |
 | Web Audio API | native |

@@ -6,7 +6,7 @@ const DOWNLOADS = [
     description: 'The complete Vite + React + TypeScript source — run with pnpm/npm locally.',
     file: 'ahana-birthday-full-project.zip',
     icon: '📦',
-    hint: 'Best for: editing content, adding features, running on Replit',
+    hint: 'Best for: editing content and adding features locally',
   },
   {
     label: '2 · GitHub Pages Ready',

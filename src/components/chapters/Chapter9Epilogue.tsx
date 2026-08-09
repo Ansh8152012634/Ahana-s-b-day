@@ -5,6 +5,7 @@ import { WarmLight } from '@/components/ending/WarmLight';
 import { TulipBloom } from '@/components/ending/TulipBloom';
 import { GiftCard } from '@/components/ending/GiftCard';
 import { FinalMessage } from '@/components/ending/FinalMessage';
+import { UnlockExperience } from '@/components/ending/UnlockExperience';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -111,9 +112,8 @@ type Scene =
   | 'tulip-entrance'
   | 'tulip-bloom'
   | 'final-message'
-  // ── Final credits ──
-  | 'credits'
-  | 'done';
+  | 'unlock'
+  | 'final-note'
 
 // ─── Memory Jar ───────────────────────────────────────────────────────────────
 
@@ -286,7 +286,40 @@ export function Chapter9Epilogue({ fadeOutAudio, playGiftReadySfx, playTulipBloo
 
   const letterIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pianoRef = useRef<HTMLAudioElement | null>(null);
+  const pianoFadeRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const tulipTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const fadePianoOut = useCallback(() => {
+    const piano = pianoRef.current;
+    if (!piano) return;
+    if (pianoFadeRef.current) clearInterval(pianoFadeRef.current);
+
+    const startVolume = piano.volume;
+    const steps = 44;
+    let step = 0;
+    pianoFadeRef.current = setInterval(() => {
+      step += 1;
+      const nextVolume = Math.max(0, startVolume * (1 - step / steps));
+      piano.volume = nextVolume;
+      if (step >= steps) {
+        piano.pause();
+        piano.volume = 0;
+        if (pianoFadeRef.current) clearInterval(pianoFadeRef.current);
+        pianoFadeRef.current = null;
+      }
+    }, 50);
+  }, []);
+
+  const stopPiano = useCallback(() => {
+    if (pianoFadeRef.current) {
+      clearInterval(pianoFadeRef.current);
+      pianoFadeRef.current = null;
+    }
+    if (pianoRef.current) {
+      pianoRef.current.pause();
+      pianoRef.current.volume = 0;
+    }
+  }, []);
 
   // ── Main timeline ──────────────────────────────────────────────
   useEffect(() => {
@@ -347,68 +380,38 @@ const fade = setInterval(() => {
       timers.forEach(clearTimeout);
       tulipTimersRef.current.forEach(clearTimeout);
       if (letterIntervalRef.current) clearInterval(letterIntervalRef.current);
+      stopPiano();
     };
-  }, []);
-
-    useEffect(() => {
-  if (scene !== 'done'||!pianoRef.current) return;
-
-  let volume = pianoRef.current.volume; 
-    
-
-    const fade = setInterval(() => {
-      volume -= 0.01;
-
-      if (volume <= 0) {
-        volume = 0;
-        pianoRef.current?.pause();
-        clearInterval(fade);
-      }
-
-      if (pianoRef.current) {
-        pianoRef.current.volume = volume;
-      }
-    }, 100);
-
-    return () => clearInterval(fade);
-}, [scene]);
+  }, [fadeOutAudio, stopPiano]);
 
 
   // ── Button click → tulip sequence ─────────────────────────────
   const handleGiftButtonClick = useCallback(() => {
+    if (pianoFadeRef.current) {
+      clearInterval(pianoFadeRef.current);
+      pianoFadeRef.current = null;
+    }
     setScene('tulip-entrance');
 
     const t1 = setTimeout(() => {
-  if (pianoRef.current) {
-    pianoRef.current.volume = 0.14;
-  }
-
-  setScene('tulip-bloom');
-  setTulipVisible(true);
-  playTulipBloomSfx?.();
-
-  setTimeout(() => {
-    if (pianoRef.current) {
-      pianoRef.current.volume = 0.22;
-    }
-  }, 2000);
-
-}, 2800);
+      // The piano deliberately continues at its current volume through the bloom.
+      setScene('tulip-bloom');
+      setTulipVisible(true);
+      playTulipBloomSfx?.();
+    }, 2800);
 
     const t2 = setTimeout(() => {
+      // The bloom has completed and had a moment to breathe before the fade.
+      fadePianoOut();
       setScene('final-message');
     }, 13800); // 2.8 entrance + 11 bloom
 
     const t3 = setTimeout(() => {
-      setScene('credits');
-    }, 22800); // + 9 s for final message reading
+      setScene('unlock');
+    }, 16600); // allow the piano's 2.2 s fade to finish
 
-    const t4 = setTimeout(() => {
-      setScene('done');
-    }, 28800); // + 6 s fade out
-
-    tulipTimersRef.current = [t1, t2, t3, t4];
-  }, [playTulipBloomSfx]);
+    tulipTimersRef.current = [t1, t2, t3];
+  }, [fadePianoOut, playTulipBloomSfx]);
 
   // ── Derived visibility flags ───────────────────────────────────
   const showJar     = ['jar-enter', 'stars-float', 'jar-glow'].includes(scene);
@@ -419,17 +422,16 @@ const fade = setInterval(() => {
   const darkOverlayOpacity =
     ['fade-black', 'gift-card', 'gift-ready', 'tulip-entrance'].includes(scene) ? 0.82
     : ['tulip-bloom', 'final-message'].includes(scene) ? 0.30
-    : ['credits', 'done'].includes(scene) ? 0.55
     : 0;
 
   const showGiftCard    = ['gift-card', 'gift-ready'].includes(scene);
   const showGiftButton  = scene === 'gift-ready';
 
-  const showTulipScene  = ['tulip-entrance', 'tulip-bloom', 'final-message', 'credits', 'done'].includes(scene);
+  const showTulipScene  = ['tulip-entrance', 'tulip-bloom', 'final-message'].includes(scene);
   const showParticles   = showTulipScene;
-  const showWarmLight   = ['tulip-bloom', 'final-message', 'credits', 'done'].includes(scene);
-  const showFinalMsg    = ['final-message', 'credits', 'done'].includes(scene);
-  const showCredits     = scene === 'credits' || scene === 'done';
+  const showWarmLight   = ['tulip-bloom', 'final-message'].includes(scene);
+  const showFinalMsg    = scene === 'final-message';
+  const showUnlock      = scene === 'unlock' || scene === 'final-note';
 
   return (
     <div className="relative min-h-[100dvh] w-full flex items-center justify-center bg-background overflow-hidden">
@@ -563,48 +565,16 @@ const fade = setInterval(() => {
       {/* ── Final message: "Some memories don't fade. They simply bloom." ── */}
       <FinalMessage visible={showFinalMsg} />
 
-      {/* ── Credits: "Made with ❤️ by Anshu" ── */}
-      <AnimatePresence>
-        {showCredits && (
-          <motion.div
-            key="credits"
-            className="absolute inset-0 flex flex-col items-center justify-center"
-            style={{ zIndex: 40 }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: scene === 'done' ? 0 : 1 }}
-            transition={{ duration: 3, ease: 'easeInOut' }}
-          >
-            {/* Glowing star above */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: scene === 'done' ? 0 : [0, 1, 0.7, 1, 0.7], scale: scene === 'done' ? 0 : [0, 1.3, 1, 1.1, 1] }}
-              transition={{ duration: 2.5, times: [0, 0.3, 0.5, 0.7, 1], ease: 'easeOut' }}
-              className="mb-8"
-              style={{ filter: 'drop-shadow(0 0 20px rgba(212,175,55,0.9))' }}
-            >
-              <svg width="32" height="32" viewBox="0 0 24 24">
-                <polygon
-                  points="12,2 14.9,8.3 22,9.3 17,14.1 18.2,21.2 12,17.8 5.8,21.2 7,14.1 2,9.3 9.1,8.3"
-                  fill="rgba(212,175,55,0.9)"
-                  stroke="rgba(255,235,150,0.7)"
-                  strokeWidth="0.5"
-                />
-              </svg>
-            </motion.div>
-
-            {/* Credit text */}
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: scene === 'done' ? 0 : 1, y: scene === 'done' ? -8 : 0 }}
-              transition={{ duration: 2, delay: 0.5, ease: 'easeOut' }}
-              className="serif text-2xl text-primary/80 tracking-wide"
-              style={{ filter: 'drop-shadow(0 0 12px rgba(212,175,55,0.4))' }}
-            >
-              Made with ❤️ by Anshu
-            </motion.p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <UnlockExperience
+        visible={showUnlock}
+        unlocked={scene === 'final-note'}
+        onUnlock={() => setScene('final-note')}
+        onVoiceStart={() => {
+          // A voice note is the sole audio focus: stop the piano immediately.
+          stopPiano();
+          fadeOutAudio?.();
+        }}
+      />
     </div>
   );
 }
